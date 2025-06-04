@@ -46,6 +46,8 @@ IV. ▶️ Cómo usarlo
    -Agregar un ingreso o gasto
    -Ver balance actual
    -Salir del programa
+   
+---
 
 V. Por hacer (TODO)
 -Agregar opción para eliminar transacciones
@@ -53,9 +55,13 @@ V. Por hacer (TODO)
 -Mejorar validación de entrada
 -Interfaz gráfica (opcional)
 
+---
+
 VI. 👩‍💻 Sobre mí
 Este es un proyecto de aprendizaje desarrollado por @Castipy como parte de su formación en programación.
 Estoy aprendiendo activamente y agradezco cualquier sugerencia o retroalimentación 🙌
+
+---
 
 VII. 📄 Licencia
 Este proyecto es de uso libre con fines educativos. ¡Si te ayuda, siéntete libre de usarlo y contribuir!
