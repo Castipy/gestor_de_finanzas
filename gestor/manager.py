@@ -13,7 +13,7 @@ class FinanceManager:
             writer = csv.writer(f)
             writer.writerow(['Type', 'Amount', 'Category', 'Description', 'Date/Time'])
             for t in self.transactions_list:
-                writer.writerow([t.type, t.amount, t.category, t.description, t.date.strftime('%Y-%m-%Y%H:%M:%S')])
+                writer.writerow([t.type, t.amount, t.category, t.description, t.date])
 
     def load_csv(self, filename):
         try:
@@ -46,3 +46,7 @@ class FinanceManager:
             if t.type == 'expense':
                 categories[t.category] = categories.get(t.category, 0) + t.amount
         return categories
+    
+    def historial_expenses(self):
+        return [t for t in self.transactions_list if t.type == 'expense']
+
