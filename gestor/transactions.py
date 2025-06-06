@@ -14,8 +14,9 @@ class Transactions:
             self.date = time.strftime('%d-%m-%Y %H:%M:%S')
 
     def __str__(self):
-        return (f"{self.type}: "
-                f"- {self.amount}"
-                f" - {self.category}"
-                f" - {self.description}"
-                f" - {self.date}")
+        list = [self.type, self.amount, self.category, self.description, self.date]
+        parts = []
+        for x in list:
+            if x:
+                parts.append(str(x))
+        return ' - '.join(parts)
