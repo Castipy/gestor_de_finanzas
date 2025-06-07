@@ -8,6 +8,7 @@ I. 🚀 Características
 
 - Agregar ingresos y gastos
 - Ver balance actual
+- Ver Historial de gastos
 - Guardar transacciones en un archivo `.csv`
 - Código modular y limpio
 

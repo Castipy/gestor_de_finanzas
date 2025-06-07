@@ -1,7 +1,7 @@
 from transactions import Transactions
 from manager import FinanceManager
+import matplotlib.pyplot as plt
 import os
-import csv
 
 def menu():
     print("\n=== Gestor de Gastos ===")
@@ -10,7 +10,15 @@ def menu():
     print("3. Ver balance total")
     print("4. Ver todos los gastos")
     print("5. Ver gastos por categoría")
-    print("6. Guardar y salir")
+    print("6. Ver gráfico de gastos por categoría")
+    print("7. Guardar y salir")
+
+def pie_graphic(values, labels, title): #funcion para crear gráfico de pastel##
+    plt.figure(figsize=(8,8))
+    plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.title(title)
+    plt.show()
+
 
 manager = FinanceManager()
 manager.load_csv(filename=os.path.join(os.path.dirname(__file__), 'data.csv'))
@@ -18,8 +26,8 @@ manager.load_csv(filename=os.path.join(os.path.dirname(__file__), 'data.csv'))
 while True:
     menu()
     choice = input("Seleccione una opción: ")
-
-    if choice == '1':
+      
+    if choice == '1':   ##Agregar ingreso##
         amount = float(input("Ingrese el monto del ingreso: "))
         category = input("Ingrese la categoría del ingreso: ")
         description = input("Ingrese una descripción del ingreso: ")
@@ -28,7 +36,7 @@ while True:
         manager.add_transaction(transaction)
         print("\nIngreso agregado exitosamente.")
 
-    elif choice == '2':
+    elif choice == '2': ##Agregar gasto##
         amount = float(input("Ingrese el monto del gasto: "))
         category = input("Ingrese la categoría del gasto: ")
         description = input("Ingrese una descripción del gasto: ")
@@ -37,11 +45,11 @@ while True:
         manager.add_transaction(transaction)
         print("\nGasto agregado exitosamente.")
 
-    elif choice == '3':
+    elif choice == '3': ##Ver balance total##
         total = manager.total_balance()
         print(f"\nEl balance total es: {total}")
     
-    elif choice == '4':
+    elif choice == '4': ##Ver todos los gastos##
         expenses = manager.historial_expenses()
         if expenses:
             print("\nHistorial de gastos:")
@@ -50,7 +58,7 @@ while True:
         else:
             print("\nNo hay gastos registrados.")
 
-    elif choice == '5':
+    elif choice == '5': ##Ver gastos por categoría##
         expenses_by_category = manager.categories_expenses()
         if expenses_by_category:
             print("\nGastos por categoría:")
@@ -58,12 +66,17 @@ while True:
                 print(f"{category}: {total}")
         else:
             print("\nNo hay gastos registrados por categoría.")
-    
 
-    elif choice == '6':
+    elif choice == '6': ##Ver gráfico de gastos por categoría##
+        category = manager.categories_expenses()
+        category_key = list(category.keys())
+        category_value = list(category.values())
+        pie_graphic(category_value, category_key, 'Gastos por Categoría')
+
+    elif choice == '7': ##Guardar y salir##
         filename = os.path.join(os.path.dirname(__file__), 'data.csv')
         manager.save_csv(filename)
-        print(f"\nDatos guardados en {filename}. Saliendo...", "Eugenio te amo")
+        print(f"\nDatos guardados en {filename}. Saliendo...")
         break
 
     else:
