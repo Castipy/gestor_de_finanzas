@@ -45,7 +45,6 @@ class FinanceManager:
         for t in self.transactions_list:
             if t.type == 'expense':
                 categories[t.category] = categories.get(t.category, 0) + t.amount
-
         return categories
     
     def historial_expenses(self):
