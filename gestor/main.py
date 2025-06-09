@@ -13,13 +13,6 @@ def menu():
     print("6. Ver gráfico de gastos por categoría")
     print("7. Guardar y salir")
 
-def pie_graphic(values, labels, title): #funcion para crear gráfico de pastel##
-    plt.figure(figsize=(8,8))
-    plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
-    plt.title(title)
-    plt.show()
-
-
 manager = FinanceManager()
 manager.load_csv(filename=os.path.join(os.path.dirname(__file__), 'data.csv'))
 
@@ -28,13 +21,16 @@ while True:
     choice = input("Seleccione una opción: ")
       
     if choice == '1':   ##Agregar ingreso##
-        amount = float(input("Ingrese el monto del ingreso: "))
-        category = input("Ingrese la categoría del ingreso: ")
-        description = input("Ingrese una descripción del ingreso: ")
-        date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
-        transaction = Transactions('income', amount, category, description, date)
-        manager.add_transaction(transaction)
-        print("\nIngreso agregado exitosamente.")
+        try:
+            amount = float(input("Ingrese el monto del ingreso: "))       
+            category = input("Ingrese la categoría del ingreso: ")
+            description = input("Ingrese una descripción del ingreso: ")
+            date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
+            transaction = Transactions('income', amount, category, description, date)
+            manager.add_transaction(transaction)
+            print("\nIngreso agregado exitosamente.")
+        except ValueError:
+            print(f"Valor incorrecto, por favor ingrese un número válido para el monto.")
 
     elif choice == '2': ##Agregar gasto##
         amount = float(input("Ingrese el monto del gasto: "))
@@ -68,10 +64,7 @@ while True:
             print("\nNo hay gastos registrados por categoría.")
 
     elif choice == '6': ##Ver gráfico de gastos por categoría##
-        category = manager.categories_expenses()
-        category_key = list(category.keys())
-        category_value = list(category.values())
-        pie_graphic(category_value, category_key, 'Gastos por Categoría')
+        manager.pie_graphic()
 
     elif choice == '7': ##Guardar y salir##
         filename = os.path.join(os.path.dirname(__file__), 'data.csv')
@@ -81,5 +74,3 @@ while True:
 
     else:
         print("\nOpción no válida. Intente de nuevo.")
-
-

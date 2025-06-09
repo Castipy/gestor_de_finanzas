@@ -7,8 +7,8 @@ class Transactions:
         self.category = category
         self.description = description
         if date:
-            if isinstance(date, str):
-                self.date = datetime.strptime(date, '%d-%m-%Y %H:%M:%S')
+                format = datetime.strptime(date, '%d-%m-%Y %H:%M:%S') #convirtiendo str
+                self.date = format.strftime('%d-%m-%Y %H:%M:%S') #formatenado fecha y guardando como atributo
         else:
             time = datetime.now()
             self.date = time.strftime('%d-%m-%Y %H:%M:%S')
