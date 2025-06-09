@@ -24,6 +24,8 @@ while True:
         try:
             amount = float(input("Ingrese el monto del ingreso: "))       
             category = input("Ingrese la categoría del ingreso: ")
+            if category.strip() == "":
+                category = "Correcciones"
             description = input("Ingrese una descripción del ingreso: ")
             date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
             transaction = Transactions('income', amount, category, description, date)
