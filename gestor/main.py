@@ -78,7 +78,7 @@ while True:
             month = input("\nIngrese el mes (MM): ")
             manager.monthly_expenses_graphic(year, month)
         elif election == '3':
-            print('\nMenú en Desarrollo')
+            manager.anual_expenses_graphic()
 
     elif choice == '7': ##Guardar y salir##
         filename = os.path.join(os.path.dirname(__file__), 'data.csv')

@@ -75,8 +75,7 @@ class FinanceManager:
             print("\nNo hay gastos registrados para mostrar en el gráfico.")
             return
         
-        df = pd.DataFrame([{'Date': t.date,'Amount': t.amount,
-        } for t in expenses])
+        df = pd.DataFrame([{'Date': t.date,'Amount': t.amount,} for t in expenses])
         df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
         df.set_index('Date', inplace=True)
         
@@ -88,7 +87,18 @@ class FinanceManager:
         #Filtrar Gastos diarios del mes especificado#
         df_daily_expenses = df_monthly_expenses.resample('D').sum()
 
-        self.plot_graph('bar', df_daily_expenses['Amount'], df_daily_expenses.index, f'Gastos diarios - {month:02d}/{year}')
+        self.plot_graph('bar', df_daily_expenses['Amount'], df_daily_expenses.index, f'Gastos diarios - {month:02d}/{year}', '%d')
+
+    def anual_expenses_graphic(self):
+        expenses = self.historial_expenses()
+        if not expenses:
+            print("No hay gastos registrados para mostrar en el gráfico.")
+            return
+        df = pd.DataFrame({'Date':t.date, 'Amount':t.amount} for t in expenses)
+        df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
+        df.set_index('Date', inplace=True)
+        df_anual_expenses = df.resample('Y').sum()
+        self.plot_graph('bar', df_anual_expenses['Amount'], df_anual_expenses.index, 'Gastos Anuales', '%Y')
 
     def historial_expenses(self): ##funcion para ver historial de gastos##
         return [t for t in self.transactions_list if t.type == 'expense']
@@ -100,7 +110,7 @@ class FinanceManager:
         plt.savefig(ruta_imagen)
         print(f"Gráfica guardada como: {ruta_imagen}")
         
-    def plot_graph(self, type, values, label, title):
+    def plot_graph(self, type, values, label, title, label_x = None,):
         if type == 'pie':
             plt.figure(figsize=(6,6))
             plt.pie(values, labels=label, autopct='%1.1f%%', startangle=140)
@@ -111,9 +121,9 @@ class FinanceManager:
         else:
             plt.figure(figsize=(6, 4))
             values.plot(kind=type, color='skyblue', edgecolor='black')
-            plt.xticks(ticks=range(len(values)), labels=label.strftime('%d'), rotation=0)
+            plt.xticks(ticks=range(len(values)), labels=label.strftime(label_x), rotation=0)
             plt.grid(axis='both', linestyle='--', alpha=0.7)
-            plt.xlabel('Día')
+            plt.xlabel('Periodo')
             plt.ylabel('Monto')
             self.save_graph("graficas", "gastos_diarios.png")
             plt.show()
