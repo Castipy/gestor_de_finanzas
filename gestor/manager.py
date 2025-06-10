@@ -1,6 +1,7 @@
 import csv
 from transactions import Transactions
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import os
 
@@ -106,6 +107,8 @@ class FinanceManager:
     def plot_graph(self, type, values, label, title, label_x = None,):
         if type == 'pie':
             plt.figure(figsize=(6,6))
+            sns.set_palette(sns.color_palette("flare"))
+            sns.set_context("notebook", font_scale=1.1)
             plt.pie(values, labels=label, autopct='%1.1f%%', startangle=140)
             plt.title(title)
             plt.tight_layout()
