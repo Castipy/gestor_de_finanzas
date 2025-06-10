@@ -6,9 +6,13 @@ Este es un proyecto de práctica en Python que permite registrar y visualizar in
 
 I. 🚀 Características
 
-- Agregar ingresos y gastos
+- Agregar ingresos y gastos con fechas, categorías, monto y descripción
 - Ver balance actual
 - Ver Historial de gastos
+- Generar gráficas por:
+   - Categorías (🥧)
+   - Mensuales (📊)
+   - Anuales (📊)
 - Guardar transacciones en un archivo `.csv`
 - Código modular y limpio
 
@@ -17,7 +21,9 @@ I. 🚀 Características
 II: 🛠️ Tecnologías usadas
 
 - Python 3.x
-- Programación orientada a objetos (POO)
+- Matplotlib
+- Pandas
+- Seaborn
 - Módulos estándar: `csv`, `os`, etc.
 
 ---
@@ -28,6 +34,7 @@ gestor_de_finanzas/
 ├── main.py # Interfaz principal del programa
 ├── gestor.py # Lógica del gestor (agrega, carga, guarda)
 ├── transaccion.py # Clase que representa una transacción
+├── graficas # Imagenes generadas
 ├── .gitignore # Archivos ignorados por Git
 └── README.md # Este archivo
 
