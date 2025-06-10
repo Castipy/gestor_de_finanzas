@@ -55,9 +55,6 @@ class FinanceManager:
     
     def categories_expenses_graphic(self): #funcion para crear gráfico de pastel##
         expenses = self.categories_expenses()
-        if not expenses:
-            print("No hay gastos registrados para mostrar en el gráfico.")
-            return
         df = pd.DataFrame(list(expenses.items()), columns=['Category', 'Amount'])
          #Ajustar elemntos para que no se superpongan#
         self.plot_graph('pie',df['Amount'], df['Category'], 'Gastos por Categoría')
@@ -71,22 +68,18 @@ class FinanceManager:
             return
         
         expenses = self.historial_expenses()
-        if not expenses:
-            print("\nNo hay gastos registrados para mostrar en el gráfico.")
-            return
-        
         df = pd.DataFrame([{'Date': t.date,'Amount': t.amount,} for t in expenses])
         df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
         df.set_index('Date', inplace=True)
-        
+
         # Filtrar Gastos por año y mes#
         df_monthly_expenses = df[(df.index.year == year) & (df.index.month == month)]
         if df_monthly_expenses.empty:
             print(f"\nNo hay gastos registrados para el mes {month} del año {year}.")
-            return  
+            return
+          
         #Filtrar Gastos diarios del mes especificado#
         df_daily_expenses = df_monthly_expenses.resample('D').sum()
-
         self.plot_graph('bar', df_daily_expenses['Amount'], df_daily_expenses.index, f'Gastos diarios - {month:02d}/{year}', '%d')
 
     def anual_expenses_graphic(self):
@@ -97,7 +90,7 @@ class FinanceManager:
         df = pd.DataFrame({'Date':t.date, 'Amount':t.amount} for t in expenses)
         df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
         df.set_index('Date', inplace=True)
-        df_anual_expenses = df.resample('Y').sum()
+        df_anual_expenses = df.resample('YE').sum()
         self.plot_graph('bar', df_anual_expenses['Amount'], df_anual_expenses.index, 'Gastos Anuales', '%Y')
 
     def historial_expenses(self): ##funcion para ver historial de gastos##

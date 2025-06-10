@@ -65,19 +65,23 @@ while True:
             print("\nNo hay gastos registrados por categoría.")
 
     elif choice == '6': ##Ver gráfico de gastos por categoría##
-        election = input("\nTipos de gráficos disponibles:"
+        expenses = manager.historial_expenses()
+        if not expenses:
+            print("\nNo hay gastos registrados para graficar.")
+            continue
+        selection = input("\nTipos de gráficos disponibles:"
                          "\n1. Gastos por Categorías"
                          "\n2. Gastos Diarios por mes"
                          "\n3. Gastos Mensuales por año"
                          "\nSeleccione una opción: ")
-        if election == '1':
+        if selection == '1':
             manager.categories_expenses_graphic()
-        elif election == '2':
+        elif selection == '2':
             print("\nPara obtener datos actuales dejar vacío el año y mes.")
             year = input("\nIngrese el año (YYYY): ")
             month = input("\nIngrese el mes (MM): ")
             manager.monthly_expenses_graphic(year, month)
-        elif election == '3':
+        elif selection == '3':
             manager.anual_expenses_graphic()
 
     elif choice == '7': ##Guardar y salir##
