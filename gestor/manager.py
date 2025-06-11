@@ -58,7 +58,7 @@ class FinanceManager:
         expenses = self.categories_expenses()
         df = pd.DataFrame(list(expenses.items()), columns=['Category', 'Amount'])
          #Ajustar elemntos para que no se superpongan#
-        self.plot_graph('pie',df['Amount'], df['Category'], 'Gastos por Categoría')
+        self.plot_graph('pie',df['Amount'],labels=df['Category'], title='Gastos por Categoría')
 
     def monthly_expenses_graphic(self, year, month): ##funcion para crear gráfico de gastos mensuales##
         try:    
@@ -81,7 +81,8 @@ class FinanceManager:
           
         #Filtrar Gastos diarios del mes especificado#
         df_daily_expenses = df_monthly_expenses.resample('D').sum()
-        self.plot_graph('bar', df_daily_expenses['Amount'], df_daily_expenses.index, f'Gastos diarios - {month:02d}/{year}', '%d')
+        
+        self.plot_graph('bar',df_daily_expenses,title=f'Gastos diarios - {month:02d}/{year}',format='%d')
 
     def anual_expenses_graphic(self):
         expenses = self.historial_expenses()
@@ -92,7 +93,8 @@ class FinanceManager:
         df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
         df.set_index('Date', inplace=True)
         df_anual_expenses = df.resample('YE').sum()
-        self.plot_graph('bar', df_anual_expenses['Amount'], df_anual_expenses.index, 'Gastos Anuales', '%Y')
+
+        self.plot_graph('bar', df_anual_expenses,title='Gastos Anuales',format='%Y')
 
     def historial_expenses(self): ##funcion para ver historial de gastos##
         return [t for t in self.transactions_list if t.type == 'expense']
@@ -100,26 +102,33 @@ class FinanceManager:
     #Funciones prácticas#
     def save_graph(self, parent_file, filename):
         os.makedirs(parent_file, exist_ok=True)
+        filename = os.path.basename(filename)  # Asegura que filename no tenga separadores ni rutas
         ruta_imagen = os.path.join(parent_file, filename) # Guardar la imagen
         plt.savefig(ruta_imagen)
         print(f"Gráfica guardada como: {ruta_imagen}")
         
-    def plot_graph(self, type, values, label, title, label_x = None,):
-        if type == 'pie':
-            plt.figure(figsize=(6,6))
-            sns.set_palette(sns.color_palette("flare"))
-            sns.set_context("notebook", font_scale=1.1)
-            plt.pie(values, labels=label, autopct='%1.1f%%', startangle=140)
+    def plot_graph(self, graph_type, values, title, labels=None,format=None ):
+        plt.figure(figsize=(6, 4))
+        sns.set_theme(style="whitegrid")
+        sns.set_palette("pastel")
+
+        if graph_type == 'pie':
+            # labels ahora es un argumento nombrado
+            plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
             plt.title(title)
-            plt.tight_layout()
-            self.save_graph("graficas", "gastos_categorías.png")
-            plt.show()
-        else:
-            plt.figure(figsize=(6, 4))
-            values.plot(kind=type, color='skyblue', edgecolor='black')
-            plt.xticks(ticks=range(len(values)), labels=label.strftime(label_x), rotation=0)
-            plt.grid(axis='both', linestyle='--', alpha=0.7)
-            plt.xlabel('Periodo')
-            plt.ylabel('Monto')
-            self.save_graph("graficas", "gastos_diarios.png")
-            plt.show()
+            
+        elif graph_type == 'bar':
+            sns.set_context("talk")
+            # values debe ser un DataFrame con columnas 'Date' y 'Amount'
+            values['DateStr']=values.index.strftime(format)
+            sns.barplot(data=values, x='DateStr', y='Amount', hue='Amount', palette='pastel',legend=False)
+            plt.xticks(rotation=0)
+            plt.title(title)
+            plt.xlabel("Fecha")
+            plt.ylabel("Monto ($)")
+
+        safe_title = title.replace('/', '-')
+        self.save_graph("graficas", safe_title +'.png')
+        plt.tight_layout()
+        plt.show()
+
