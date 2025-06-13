@@ -5,6 +5,7 @@ import os
 
 ##Cargando Archivo CSV##
 manager= FinanceManager()
+graphs = Graphs(manager)
 manager.load_csv(filename=os.path.join(os.path.dirname(os.path.dirname(__file__)),'data/data.csv'))
 
 def menu():
@@ -23,9 +24,9 @@ while True:
       
     if choice == '1':   ##Agregar ingreso##
         try:
-            amount = float(input("Ingrese el monto del ingreso: "))       
+            amount = abs(float(input("Ingrese el monto del ingreso: ")))       
             category = input("Ingrese la categoría del ingreso: ")
-            if category.strip() == "":
+            if not category.strip() == "":
                 category = "Correcciones"
             description = input("Ingrese una descripción del ingreso: ")
             date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
@@ -36,13 +37,16 @@ while True:
             print(f"Valor incorrecto, por favor ingrese un número válido para el monto.")
 
     elif choice == '2': ##Agregar gasto##
-        amount = float(input("Ingrese el monto del gasto: "))
-        category = input("Ingrese la categoría del gasto: ")
-        description = input("Ingrese una descripción del gasto: ")
-        date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
-        transaction = Transactions('expense', amount, category, description, date)
-        manager.add_transaction(transaction)
-        print("\nGasto agregado exitosamente.")
+        try:
+            amount = abs(float(input("Ingrese el monto del gasto: ")))
+            category = input("Ingrese la categoría del gasto: ")
+            description = input("Ingrese una descripción del gasto: ")
+            date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
+            transaction = Transactions('expense', amount, category, description, date)
+            manager.add_transaction(transaction)
+            print("\nGasto agregado exitosamente.")
+        except ValueError:
+            print(f"Valor incorrecto, por favor ingrese un número válido para el monto.")
 
     elif choice == '3': ##Ver balance total##
         total = manager.total_balance()
@@ -67,7 +71,6 @@ while True:
             print("\nNo hay gastos registrados por categoría.")
 
     elif choice == '6': ##Ver gráfico de gastos por categoría##
-        graphs = Graphs(manager)
         expenses = manager.historial_expenses()
         if not expenses:
             print("\nNo hay gastos registrados para graficar.")
@@ -86,11 +89,15 @@ while True:
             graphs.monthly_expenses_graphic(year, month)
         elif selection == '3':
             graphs.anual_expenses_graphic()
+        else:
+            print("\nOpción no válida. Por favor, seleccione una opción válida.")
+            continue
 
     elif choice == '7': ##Guardar y salir##
-        filename = os.path.join(os.path.dirname(os.path.dirname(__file__)),'data/data.csv')
-        manager.save_csv(filename)
-        print(f"\nDatos guardados en {filename}. Saliendo...")
+        os.makedirs('data', exist_ok=True)
+        file_path= os.path.join('data',os.path.basename('data.csv'))
+        manager.save_csv(file_path)
+        print(f"\nDatos guardados en {file_path}. Saliendo...")
         break
 
     else:

@@ -67,6 +67,7 @@ class Graphs:
         df_anual_expenses = df.resample('YE').sum()
         self.plot_graph('bar', df_anual_expenses, title='Gastos Anuales', format='%Y')
 
+   
     def save_graph(self, parent_file:str, filename:str) -> None:
         '''Guarda el gráfico generado en un archivo.'''
         os.makedirs(parent_file, exist_ok=True)
@@ -75,6 +76,7 @@ class Graphs:
         plt.savefig(ruta_imagen)
         print(f"Gráfica guardada como: {ruta_imagen}")
 
+    
     def plot_graph(self, graph_type:str, values:pd.DataFrame, title:str, labels:List[str]=None, format=None) -> plt.Figure:
         '''Crea, muestra y devuelve el objeto matplotlib Figure generado.'''
         
@@ -90,6 +92,7 @@ class Graphs:
             plt.title(title)
         elif graph_type == 'bar':
             sns.set_context("talk")
+            values = values.copy()
             values['DateStr'] = values.index.strftime(format)
             sns.barplot(data=values, x='DateStr', y='Amount', color='skyblue')
             plt.xticks(rotation=0)
@@ -97,9 +100,10 @@ class Graphs:
             plt.xlabel("Fecha")
             plt.ylabel("Monto ($)")
 
-        safe_title = title.replace('/', '-')
         fig = plt.gcf()
+        safe_title = title.replace('/', '-')
         self.save_graph("graficas", safe_title + '.png')
         plt.tight_layout()
+        plt.show()
         plt.close(fig)  # Libera memoria si se generan muchas figuras
         return fig

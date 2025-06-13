@@ -31,7 +31,7 @@ class FinanceManager:
                 for row in reader:
                     try:
                         t = Transactions(
-                            row['Type'],
+                            row['Model'],
                             float(row['Amount']),
                             row['Category'],
                             row['Description'],
@@ -48,9 +48,9 @@ class FinanceManager:
         '''Guarda transacciones en un archivo CSV.'''
         with open(filename, mode='w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['Type', 'Amount', 'Category', 'Description', 'Date/Time'])
+            writer.writerow(['Model', 'Amount', 'Category', 'Description', 'Date/Time'])
             for t in self.transactions_list:
-                writer.writerow([t.type, t.amount, t.category, t.description, t.date])        
+                writer.writerow([t.model, t.amount, t.category, t.description, t.date])        
 
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
@@ -61,7 +61,7 @@ class FinanceManager:
         '''Calcula el balance total de las transacciones.'''
         total = 0
         for t in self.transactions_list:
-            if t.type == 'income':
+            if t.model == 'income':
                 total += t.amount
             else:
                 total -= t.amount
@@ -71,12 +71,12 @@ class FinanceManager:
         '''Calcula los gastos totales por categoría.'''
         categories = {}
         for t in self.transactions_list:
-            if t.type == 'expense':
+            if t.model == 'expense':
                 categories[t.category] = categories.get(t.category, 0) + t.amount
         return categories
 
     def historial_expenses(self) -> List[Transactions]: 
         '''Devuelve un historial de todas las transacciones de tipo 'expense'.'''
-        return [t for t in self.transactions_list if t.type == 'expense']
+        return [t for t in self.transactions_list if t.model == 'expense']
 
 
