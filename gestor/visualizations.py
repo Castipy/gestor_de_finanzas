@@ -2,17 +2,18 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import os
+from typing import List
 
 class Graphs:
     def __init__(self, manager):
         self.manager = manager
 
-    def categories_expenses_graphic(self):
+    def categories_expenses_graphic(self) -> None:
         expenses = self.manager.categories_expenses()
         df = pd.DataFrame(list(expenses.items()), columns=['Category', 'Amount'])
         self.plot_graph('pie', df['Amount'], labels=df['Category'], title='Gastos por Categoría')
 
-    def monthly_expenses_graphic(self, year, month):
+    def monthly_expenses_graphic(self, year:str, month:str) -> None:
         try:
             year = int(year) if year else pd.Timestamp.now().year
             month = int(month) if month else pd.Timestamp.now().month
@@ -33,7 +34,7 @@ class Graphs:
         df_daily_expenses = df_monthly_expenses.resample('D').sum()
         self.plot_graph('bar', df_daily_expenses, title=f'Gastos diarios - {month:02d}-{year}', format='%d')
 
-    def anual_expenses_graphic(self):
+    def anual_expenses_graphic(self) -> None:
         expenses = self.manager.historial_expenses()
         if not expenses:
             print("No hay gastos registrados para mostrar en el gráfico.")
@@ -44,14 +45,14 @@ class Graphs:
         df_anual_expenses = df.resample('YE').sum()
         self.plot_graph('bar', df_anual_expenses, title='Gastos Anuales', format='%Y')
 
-    def save_graph(self, parent_file, filename):
+    def save_graph(self, parent_file:str, filename:str) -> None:
         os.makedirs(parent_file, exist_ok=True)
         filename = os.path.basename(filename)
         ruta_imagen = os.path.join(parent_file, filename)
         plt.savefig(ruta_imagen)
         print(f"Gráfica guardada como: {ruta_imagen}")
 
-    def plot_graph(self, graph_type, values, title, labels=None, format=None):
+    def plot_graph(self, graph_type:str, values:pd.DataFrame, title:str, labels:List[str]=None, format=None) -> None:
         plt.figure(figsize=(6, 4))
         sns.set_theme(style="whitegrid")
         sns.set_palette("pastel")
@@ -62,7 +63,7 @@ class Graphs:
         elif graph_type == 'bar':
             sns.set_context("talk")
             values['DateStr'] = values.index.strftime(format)
-            sns.barplot(data=values, x='DateStr', y='Amount', palette='pastel', legend=False)
+            sns.barplot(data=values, x='DateStr', y='Amount', color='skyblue')
             plt.xticks(rotation=0)
             plt.title(title)
             plt.xlabel("Fecha")
