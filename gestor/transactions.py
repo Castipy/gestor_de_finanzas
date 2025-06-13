@@ -1,13 +1,24 @@
 from datetime import datetime
 from typing import Optional
 
-class Transactions:
+class Transactions: 
+    ''' Clase de las transacciones financieras.
+    Esta clase representa una transacción financiera, ya sea un ingreso o un gasto.
+    Atributos:
+        type (str): Tipo de transacción ('ingreso' o 'gasto').
+        amount (float): Monto de la transacción.
+        category (str): Categoría de la transacción.
+        description (str): Descripción de la transacción.
+        date (str): Fecha y hora de la transacción en formato 'dd-mm-YYYY HH:MM:SS'.
+        DATE_FORMAT (str): Formato de fecha y hora utilizado para la transacción.
+    '''
+    DATE_FORMAT = '%d-%m-%Y %H:%M:%S' #formato de fecha y hora
+    
     def __init__(self, type: str, amount: float, category: str, description: str, date: Optional[str] = None):
         self.type = type #ingreso o gasto#
         self.amount = amount
         self.category = category
         self.description = description
-        self.DATE_FORMAT = '%d-%m-%Y %H:%M:%S' #formato de fecha y hora
         if date:
                 try:
                     format = datetime.strptime(date, self.DATE_FORMAT) #convirtiendo str
