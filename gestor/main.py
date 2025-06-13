@@ -1,6 +1,11 @@
 from transactions import Transactions
-from manager import FinanceManager
+from core import FinanceManager
+from visualizations import Graphs
 import os
+
+##Cargando Archivo CSV##
+manager= FinanceManager()
+manager.load_csv(filename=os.path.join(os.path.dirname(os.path.dirname(__file__)),'data/data.csv'))
 
 def menu():
     print("\n=== Gestor de Gastos ===")
@@ -11,9 +16,6 @@ def menu():
     print("5. Ver gastos por categoría")
     print("6. Gráficas")
     print("7. Guardar y salir")
-
-manager = FinanceManager()
-manager.load_csv(filename=os.path.join(os.path.dirname(__file__), 'data.csv'))
 
 while True:
     menu()
@@ -65,6 +67,7 @@ while True:
             print("\nNo hay gastos registrados por categoría.")
 
     elif choice == '6': ##Ver gráfico de gastos por categoría##
+        graphs = Graphs(manager)
         expenses = manager.historial_expenses()
         if not expenses:
             print("\nNo hay gastos registrados para graficar.")
@@ -75,17 +78,17 @@ while True:
                          "\n3. Gastos Mensuales por año"
                          "\nSeleccione una opción: ")
         if selection == '1':
-            manager.categories_expenses_graphic()
+            graphs.categories_expenses_graphic()
         elif selection == '2':
             print("\nPara obtener datos actuales dejar vacío el año y mes.")
             year = input("\nIngrese el año (YYYY): ")
             month = input("\nIngrese el mes (MM): ")
-            manager.monthly_expenses_graphic(year, month)
+            graphs.monthly_expenses_graphic(year, month)
         elif selection == '3':
-            manager.anual_expenses_graphic()
+            graphs.anual_expenses_graphic()
 
     elif choice == '7': ##Guardar y salir##
-        filename = os.path.join(os.path.dirname(__file__), 'data.csv')
+        filename = os.path.join(os.path.dirname(os.path.dirname(__file__)),'data/data.csv')
         manager.save_csv(filename)
         print(f"\nDatos guardados en {filename}. Saliendo...")
         break

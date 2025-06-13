@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
-data.csv
-graficas
+graficas/
+data/
+.venv
+*.csv
