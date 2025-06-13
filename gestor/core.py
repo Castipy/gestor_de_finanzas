@@ -5,6 +5,7 @@ from typing import List
 class FinanceManager:
     def __init__(self):
         self.transactions_list = []
+        self.DATE_FORMAT = '%d-%m-%Y %H:%M:%S'  # formato de fecha y hora
     
     def load_csv(self, filename: str) -> None: ##funcion para cargar csv##
         try:

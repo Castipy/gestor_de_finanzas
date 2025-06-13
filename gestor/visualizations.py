@@ -3,9 +3,10 @@ import seaborn as sns
 import pandas as pd
 import os
 from typing import List
+from core import FinanceManager
 
 class Graphs:
-    def __init__(self, manager):
+    def __init__(self, manager:FinanceManager):
         self.manager = manager
 
     def categories_expenses_graphic(self) -> None:
@@ -23,7 +24,7 @@ class Graphs:
 
         expenses = self.manager.historial_expenses()
         df = pd.DataFrame([{'Date': t.date, 'Amount': t.amount} for t in expenses])
-        df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
+        df['Date'] = pd.to_datetime(df['Date'], format=self.manager.DATE_FORMAT)
         df.set_index('Date', inplace=True)
 
         df_monthly_expenses = df[(df.index.year == year) & (df.index.month == month)]
@@ -40,7 +41,7 @@ class Graphs:
             print("No hay gastos registrados para mostrar en el gráfico.")
             return
         df = pd.DataFrame({'Date': t.date, 'Amount': t.amount} for t in expenses)
-        df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y %H:%M:%S')
+        df['Date'] = pd.to_datetime(df['Date'], format=self.manager.DATE_FORMAT)
         df.set_index('Date', inplace=True)
         df_anual_expenses = df.resample('YE').sum()
         self.plot_graph('bar', df_anual_expenses, title='Gastos Anuales', format='%Y')
@@ -53,10 +54,13 @@ class Graphs:
         print(f"Gráfica guardada como: {ruta_imagen}")
 
     def plot_graph(self, graph_type:str, values:pd.DataFrame, title:str, labels:List[str]=None, format=None) -> None:
+        if graph_type not in {'pie', 'bar'}:
+            raise ValueError(f"Tipo de gráfico no soportado: {graph_type}")
+        
         plt.figure(figsize=(6, 4))
         sns.set_theme(style="whitegrid")
         sns.set_palette("pastel")
-
+    
         if graph_type == 'pie':
             plt.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
             plt.title(title)
@@ -73,3 +77,6 @@ class Graphs:
         self.save_graph("graficas", safe_title + '.png')
         plt.tight_layout()
         plt.show()
+        ##Para Futuras Test###
+        fig = plt.gcf()
+        return fig
