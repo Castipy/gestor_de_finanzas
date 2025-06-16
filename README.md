@@ -35,7 +35,7 @@ gestor_de_finanzas/
 
 ## 📈 Ejemplo de visualización
 
-![Ejemplo de gráfico de gastos por categoría](<graficas/Gastos por Categoría.png>)
+![Ejemplo de gráfico de gastos por categoría](<images/Gastos por Categoría.png>)
 
 ## 🚀 Cómo ejecutar
 
