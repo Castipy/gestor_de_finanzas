@@ -1,75 +1,66 @@
-# Gestor de Finanzas Personales 🧾💰
+# 💰 Gestor de Finanzas
 
-Este es un proyecto de práctica en Python que permite registrar y visualizar ingresos y gastos personales desde la línea de comandos. Está organizado con programación orientada a objetos y estructurado en módulos para facilitar su mantenimiento y expansión.
+Proyecto personal para el manejo y visualización de finanzas personales utilizando Python, pandas y visualización con seaborn y matplotlib.
 
----
+## 📌 Descripción
 
-I. 🚀 Características
+Este proyecto permite llevar un registro de ingresos y gastos, categorizarlos, analizarlos y generar gráficos para tener una visión clara del estado financiero personal o familiar.
 
-- Agregar ingresos y gastos con fechas, categorías, monto y descripción
-- Ver balance actual
-- Ver Historial de gastos
-- Generar gráficas por:
-   - Categorías (🥧)
-   - Mensuales (📊)
-   - Anuales (📊)
-- Guardar transacciones en un archivo `.csv`
-- Código modular y limpio
+## 🛠️ Funcionalidades
 
----
+- Registro de transacciones con fecha, monto, categoría y descripción.
+- Clasificación de ingresos y gastos.
+- Visualizaciones por categoría, mes o tipo de transacción.
+- Análisis de tendencias de gasto.
+- Exportación de datos (próximamente).
+- Interfaz gráfica (pendiente para versiones futuras).
 
-II: 🛠️ Tecnologías usadas
+## 📊 Tecnologías utilizadas
 
-- Python 3.x
-- Matplotlib
-- Pandas
-- Seaborn
-- Módulos estándar: `csv`, `os`, etc.
+- Python 3
+- pandas
+- matplotlib
+- seaborn
+- Git & GitHub
 
----
-
-III. 📦 Estructura del proyecto
-
+## 📁 Estructura del proyecto
 gestor_de_finanzas/
-├── main.py # Interfaz principal del programa
-├── gestor.py # Lógica del gestor (agrega, carga, guarda)
-├── transaccion.py # Clase que representa una transacción
-├── graficas # Imagenes generadas
-├── .gitignore # Archivos ignorados por Git
-└── README.md # Este archivo
+│
+├── core.py # Lógica principal
+├── graphs.py # Visualizaciones
+├── main.py # Interfaz por consola
+├── data/ # Carpeta para archivos CSV
+├── README.md # Este archivo
+└── requirements.txt # Dependencias del proyecto
 
-> El archivo `datos.csv` se genera automáticamente cuando se agregan transacciones y **no se incluye en el repositorio** por privacidad.
+## 📈 Ejemplo de visualización
 
----
+![Ejemplo de gráfico de gastos por categoría](graficas/gastos_categorias.png)
 
-IV. ▶️ Cómo usarlo
+## 🚀 Cómo ejecutar
 
-1. Clona este repositorio:
+1. Clona el repositorio:
    ```bash
-   >git clone https://github.com/Castipy/gestor_de_finazas.git
-   >cd gestor_de_finazas
-2. Ejecuta el programa:
-   >python main.py
-3. Usa el menú para:
-   -Agregar un ingreso o gasto
-   -Ver balance actual
-   -Salir del programa
-   
----
+    git clone https://github.com/TU_USUARIO/gestor_de_finanzas.git
 
-V. Por hacer (TODO)
--Agregar opción para eliminar transacciones
--Visualizar estadísticas o gráficos
--Mejorar validación de entrada
--Interfaz gráfica (opcional)
+2. Instala las dependencias:
 
----
+pip install -r requirements.txt
 
-VI. 👩‍💻 Sobre mí
-Este es un proyecto de aprendizaje desarrollado por @Castipy como parte de su formación en programación.
-Estoy aprendiendo activamente y agradezco cualquier sugerencia o retroalimentación 🙌
+3. Ejecuta el programa:
 
----
+    python main.py
 
-VII. 📄 Licencia
-Este proyecto es de uso libre con fines educativos. ¡Si te ayuda, siéntete libre de usarlo y contribuir!
+📝 Próximas mejoras
+
+Interfaz gráfica con tkinter o Streamlit
+
+Exportación a Excel o PDF
+
+Conexión con base de datos SQLite
+
+    Integración con Power BI
+
+✍️ Autora
+
+Claudia Arrieta Castellanos – Ingeniera con enfoque en análisis de datos y automatización.
