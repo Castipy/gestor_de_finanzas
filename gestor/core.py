@@ -1,6 +1,7 @@
 import csv
 from transactions import Transactions
 from typing import List
+import pandas as pd
 
 class FinanceManager:
     ''' Clase para gestionar las transacciones financieras.
@@ -26,31 +27,29 @@ class FinanceManager:
     def load_csv(self, filename: str) -> None:
         '''Carga transacciones desde un archivo CSV.'''
         try:
-            with open(filename, mode='r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    try:
-                        t = Transactions(
-                            row['Model'],
-                            float(row['Amount']),
-                            row['Category'],
-                            row['Description'],
-                            row['Date/Time']
-                        )
-                        self.transactions_list.append(t)
-                    except (KeyError, ValueError) as e:
-                        print(f"Warning: Skipping invalid row {row}. Error: {e}")
+            df = pd.read_csv(filename, encoding='utf-8')
+            for _, row in df.iterrows():
+                try:
+                    t = Transactions(
+                        row['Model'],
+                        float(row['Amount']),
+                        row['Category'],
+                        row['Description'],
+                        row['Date/Time']
+                    )
+                    self.transactions_list.append(t)
+                except (KeyError, ValueError) as e:
+                    print(f"Warning: Skipping invalid row {row}. Error: {e}")
         except FileNotFoundError:
             print(f"Error: El archivo {filename} no existe.")
             pass
 
     def save_csv(self, filename: str) -> None:
         '''Guarda transacciones en un archivo CSV.'''
-        with open(filename, mode='w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Model', 'Amount', 'Category', 'Description', 'Date/Time'])
-            for t in self.transactions_list:
-                writer.writerow([t.model, t.amount, t.category, t.description, t.date])        
+        data = [t.__dict__ for t in self.transactions_list]
+        df = pd.DataFrame(data)
+        df.columns = ['model', 'amount', 'category', 'description', 'date']
+        df.to_csv(filename, index=False)       
 
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
