@@ -15,24 +15,20 @@ class Transactions:
     DATE_FORMAT = '%d-%m-%Y %H:%M:%S' #formato de fecha y hora
     
     def __init__(self, model: str, amount: float, category: str, description: str, date: Optional[str] = None):
-        self.model = model #ingreso o gasto#
-        self.amount = amount
-        self.category = category
-        self.description = description
+        self.Model = model #ingreso o gasto#
+        self.Amount = amount
+        self.Category = category
+        self.Description = description
         if date:
                 try:
-                    parsed_date = datetime.strptime(date, self.DATE_FORMAT) #convirtiendo str
-                    self.date = parsed_date.strftime(self.DATE_FORMAT) #formatenado fecha y guardando como atributo
+                    self.Date = datetime.strptime(date, self.DATE_FORMAT) #convirtiendo str
                 except ValueError:
                     raise ValueError(f"Formato de fecha inválido: {date}")
         else:
-            time = datetime.now()
-            self.date = time.strftime(self.DATE_FORMAT)
+            self.Date = datetime.now()
 
     def __str__(self) -> str:
-        list = [self.model, self.amount, self.category, self.description, self.date]
-        parts = []
-        for x in list:
-            if x:
-                parts.append(str(x))
-        return ' - '.join(parts)
+        # Formatea la fecha solo al mostrarla
+        formated_date = self.Date.strftime(self.DATE_FORMAT)
+        parts = [self.Model, self.Amount, self.Category, self.Description, formated_date]
+        return ' - '.join(str(x) for x in parts if x)
