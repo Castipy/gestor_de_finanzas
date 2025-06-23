@@ -7,7 +7,7 @@ import pandas as pd
 manager= FinanceManager()
 graphs = Graphs(manager)
 ##Cargando Archivo CSV##
-manager.load_excel()
+ERROR=manager.load_excel()
 
 def menu():
     print("\n=== Gestor de Gastos ===")
@@ -50,8 +50,7 @@ while True:
 
     elif choice == '3': ##Ver balance total##
         total = manager.total_balance()
-        print(f"\nEl balance total es: {total}")
-
+            
     elif choice == '4': ##Ver gastos##
         _,resumen = manager.expenses()
         if resumen.empty:
@@ -192,3 +191,11 @@ while True:
 
     else:
         print("\nOpción no válida. Intente de nuevo.")
+    
+#Comprobando errores#
+if not ERROR.empty:
+    for e in ERROR:
+        if e == FileNotFoundError:
+            print(f"\nArchivo no encontrado en {manager.FILE_PATH} : {e}")
+        elif e == KeyError or e == ValueError:
+            print(f"\nValor incorrecto : {e}")
