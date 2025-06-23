@@ -21,12 +21,14 @@ def menu():
 while True:
     menu()
     choice = input("Seleccione una opción: ")
-      
+    if choice not in ['1', '2', '3', '4', '5', '6']:
+        print("\nOpción no válida. Por favor, seleccione una opción válida.")
+        continue 
     if choice == '1':   ##Agregar ingreso##
         try:
             Amount = abs(float(input("Ingrese el monto del ingreso: ")))       
             Category = input("Ingrese la categoría del ingreso: ")
-            if not Category.strip() == "":
+            if not Category.strip():
                 Category = "Correcciones"
             Description = input("Ingrese una descripción del ingreso: ")
             Date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
@@ -35,11 +37,15 @@ while True:
             print("\nIngreso agregado exitosamente.")
         except ValueError:
             print(f"Valor incorrecto, por favor ingrese un número válido para el monto.")
+        # Guardar los cambios en el archivo Excel#
+        manager.save_excel()
 
     elif choice == '2': ##Agregar gasto##
         try:
             Amount = abs(float(input("Ingrese el monto del gasto: ")))
             Category = input("Ingrese la categoría del gasto: ")
+            if not Category.strip():
+                Category = "Correcciones"
             Description = input("Ingrese una descripción del gasto: ")
             Date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
             transaction = Transactions('expense', Amount, Category, Description, Date)
@@ -47,6 +53,8 @@ while True:
             print("\nGasto agregado exitosamente.")
         except ValueError:
             print(f"Valor incorrecto, por favor ingrese un número válido para el monto.")
+        # Guardar los cambios en el archivo Excel#
+        manager.save_excel()
 
     elif choice == '3': ##Ver balance total##
         total = manager.total_balance()
@@ -63,7 +71,9 @@ while True:
               "\n4. Gasto Anual"
               "\n5. Gastos Anuales (últimos 10 años)")
         selection = input("Seleccione una opción: ")
-
+        if selection not in ['1', '2', '3', '4', '5']:
+            print("\nOpción no válida. Por favor, seleccione una opción válida.")
+            continue
         if selection == '1':
             resumen = resumen.set_index('Category').T
             print(resumen)
@@ -122,9 +132,6 @@ while True:
             print('\n', resumen.to_string(index=False))
             total= resumen.values.sum()
             print(f'\nTotal de gastos {total}')
-        else:
-            print("\nOpción no válida. Por favor, seleccione una opción válida.")
-            continue
 
     elif choice == '5': ##Ver gráficos de gastos##
         _,resumen = manager.expenses()
@@ -137,6 +144,9 @@ while True:
                         "\n3. Gastos Anuales"
                         "\n4. Gastos de todos los Años"
                         "\nSeleccione una opción: ")
+        if selection not in ['1', '2', '3', '4']:
+            print("\nOpción no válida. Por favor, seleccione una opción válida.")
+            continue
         if selection == '1':
             print('\nPara obtener estadisticas actuales NO introduzca datos')
             year = input("\nIngrese el año (YYYY): ")
@@ -180,22 +190,14 @@ while True:
             year = pd.Timestamp.now().year
             resumen = resumen.reindex(range(year-9,year + 1),fill_value=0).reset_index()
             graphs.expenses_graphics(resumen, f'Gastos de los últimos 10 años {year-10}-{year}' )
-        else:
-            print("\nOpción no válida. Por favor, seleccione una opción válida.")
-            continue
 
     elif choice == '6': ##Guardar y salir##
         file_path = manager.save_excel()
         print(f"\nDatos guardados en {file_path}. Saliendo...")
         break
-
-    else:
-        print("\nOpción no válida. Intente de nuevo.")
     
 #Comprobando errores#
 if not ERROR.empty:
-    for e in ERROR:
-        if e == FileNotFoundError:
-            print(f"\nArchivo no encontrado en {manager.FILE_PATH} : {e}")
-        elif e == KeyError or e == ValueError:
-            print(f"\nValor incorrecto : {e}")
+    print("\nSe han registrado errores durante la ejecución del programa.")
+    print(ERROR.to_string(index=False))
+    
