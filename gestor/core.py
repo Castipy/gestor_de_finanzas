@@ -28,7 +28,9 @@ class FinanceManager:
     def __init__(self):
         self.df_transactions = pd.DataFrame()
 
-    #Actualmente no se utiliza este método, pero se puede implementar en el futuro#    
+#########################################
+#Cargar y Salvar Archivos Excel#
+#########################################    
        
     def load_excel(self) -> pd.DataFrame[Exception]:
         '''Carga transacciones desde un archivo excel.'''
@@ -69,6 +71,10 @@ class FinanceManager:
         self.df_transactions.to_excel(path, index=False)
         return path     
 
+#########################################
+#Añadir transaccion,mostrar gastos#
+#########################################
+
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
         self.df_transactions = pd.concat([self.df_transactions, pd.DataFrame([transaction.__dict__])], ignore_index=True)
@@ -83,9 +89,6 @@ class FinanceManager:
     
     def expenses(self) -> tuple:
         '''Calcula los gastos totales por categoría agrupados por mes y año.'''
-        # Chequeo de transacciones #
-        if self.df_transactions.empty: 
-            return pd.DataFrame()
         # Filtrando por gastos #
         expenses = self.df_transactions[self.df_transactions['Model'] == 'expense'].copy()
         #Chequeo de gastos
@@ -154,10 +157,39 @@ class FinanceManager:
             resumen['Years'] = resumen.index.year
             resumen = resumen.groupby('Years')['Amount'].sum()
             return 'ok',resumen
-        
+
+#########################################
+        #Manejo de Errores#
+######################################### 
+#         
     def errors_register(self, e, message) -> pd.DataFrame:
         '''Retorna los errores registrados'''
         self.ERROR = pd.concat([self.ERROR, 
                                     pd.DataFrame([{'Error': type(e).__name__, 'Message': message}])], 
                                     ignore_index=True)
         return self.ERROR
+
+#########################################
+#Mostrar,Eliminar y Editar transacciones#
+#########################################
+
+    def list_transactions(self, model_filter: str = None) -> pd.DataFrame:
+        '''Devuelve las transacciones con sus índices visibles, opcionalmente filtradas por tipo.'''
+        
+        if self.df_transactions.empty:
+            return pd.DataFrame()
+        
+        df_copy = self.df_transactions.copy()
+        df_copy.index.name = 'Index'
+        if model_filter in ['income', 'expense']:
+            df_copy = df_copy[df_copy['Model'] == model_filter]
+        
+        return df_copy.reset_index()
+    
+    def delete_transaction(self, index: int) -> bool:
+        '''Elimina una transacción por su índice. Retorna True si se eliminó, False si no.'''
+        if 0 <= index < len(self.df_transactions):
+            self.df_transactions.drop(index=index, inplace=True)
+            self.df_transactions.reset_index(drop=True, inplace=True)
+            return True
+        return False
