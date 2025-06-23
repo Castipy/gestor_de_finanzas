@@ -29,25 +29,6 @@ class FinanceManager:
         self.df_transactions = pd.DataFrame()
 
     #Actualmente no se utiliza este método, pero se puede implementar en el futuro#    
-    def load_csv(self, filename: str = os.path.join('data', os.path.basename('data.csv'))) -> None:
-        '''Carga transacciones desde un archivo CSV.'''
-        try:
-            df = pd.read_csv(filename, encoding='utf-8')
-            for _, row in df.iterrows():
-                try:
-                    t = Transactions(
-                        row['Model'],
-                        float(row['Amount']),
-                        row['Category'],
-                        row['Description'],
-                        row['Date/Time']
-                    )
-                    self.transactions_list.append(t)
-                except (KeyError, ValueError) as e:
-                    print(f"Warning: Skipping invalid row {row}. Error: {e}")
-        except FileNotFoundError:
-            print(f"Error: El archivo {filename} no existe.")
-            pass
        
     def load_excel(self) -> None:
         '''Carga transacciones desde un archivo excel.'''

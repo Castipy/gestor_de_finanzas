@@ -24,13 +24,13 @@ while True:
       
     if choice == '1':   ##Agregar ingreso##
         try:
-            amount = abs(float(input("Ingrese el monto del ingreso: ")))       
-            category = input("Ingrese la categoría del ingreso: ")
-            if not category.strip() == "":
-                category = "Correcciones"
-            description = input("Ingrese una descripción del ingreso: ")
-            date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
-            transaction = Transactions('income', amount, category, description, date)
+            Amount = abs(float(input("Ingrese el monto del ingreso: ")))       
+            Category = input("Ingrese la categoría del ingreso: ")
+            if not Category.strip() == "":
+                Category = "Correcciones"
+            Description = input("Ingrese una descripción del ingreso: ")
+            Date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
+            transaction = Transactions('income', Amount, Category, Description, Date)
             manager.add_transaction(transaction)
             print("\nIngreso agregado exitosamente.")
         except ValueError:
@@ -38,11 +38,11 @@ while True:
 
     elif choice == '2': ##Agregar gasto##
         try:
-            amount = abs(float(input("Ingrese el monto del gasto: ")))
-            category = input("Ingrese la categoría del gasto: ")
-            description = input("Ingrese una descripción del gasto: ")
-            date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
-            transaction = Transactions('expense', amount, category, description, date)
+            Amount = abs(float(input("Ingrese el monto del gasto: ")))
+            Category = input("Ingrese la categoría del gasto: ")
+            Description = input("Ingrese una descripción del gasto: ")
+            Date = input("Ingrese una fecha (dd-mm-YYYY HH:MM:SS) o deje en blanco para usar la fecha actual: ")
+            transaction = Transactions('expense', Amount, Category, Description, Date)
             manager.add_transaction(transaction)
             print("\nGasto agregado exitosamente.")
         except ValueError:
