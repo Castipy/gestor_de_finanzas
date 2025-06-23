@@ -1,8 +1,8 @@
-import csv
 from transactions import Transactions
 from typing import List
 import pandas as pd
 import os
+import glob
 class FinanceManager:
     ''' Clase para gestionar las transacciones financieras.
     Esta clase permite cargar, guardar y manipular transacciones financieras,
@@ -10,7 +10,7 @@ class FinanceManager:
     Atributos:
         transactions_list (List[Transactions]): Lista de transacciones financieras.
         DATE_FORMAT (str): Formato de fecha y hora utilizado para las transacciones.
-        FILE_PATH (str): Ruta del archivo donde se guardan las transacciones.
+        ERROR (pd.DataFrame): DataFrame para registrar errores durante la carga de transacciones.
     Métodos:
         load_csv: Carga transacciones desde un archivo CSV.
         load_excel: Carga transacciones desde un archivo Excel.
@@ -23,8 +23,8 @@ class FinanceManager:
     ''' 
     
     DATE_FORMAT = '%d-%m-%Y %H:%M:%S'
-    FILE_PATH = os.path.join('data', os.path.basename('data.xlsx'))
     ERROR = pd.DataFrame(columns=['Error','Message'])
+    
     def __init__(self):
         self.df_transactions = pd.DataFrame()
 
@@ -32,10 +32,12 @@ class FinanceManager:
        
     def load_excel(self) -> pd.DataFrame[Exception]:
         '''Carga transacciones desde un archivo excel.'''
+        files = glob.glob(os.path.join('data', 'data_*.xlsx'))
+        latest_file = max(files, key=os.path.getctime)
         try:
-            df = pd.read_excel(self.FILE_PATH)
+            df = pd.read_excel(latest_file)
         except FileNotFoundError as e:
-            self.ERROR=self.errors_register(e, f'Archivo no encontrado en ruta {self.FILE_PATH}')
+            self.ERROR=self.errors_register(e, f'Archivo no encontrado en ruta {latest_file}')
             pass
         #Iterando sobre filas y columnas en este caso omite las columnas#
         for _, row in df.iterrows(): 
@@ -62,9 +64,10 @@ class FinanceManager:
         #Formateando columna Date antes de guardar
         self.df_transactions['Date'] = self.df_transactions['Date'].dt.strftime(self.DATE_FORMAT) 
         print(self.df_transactions)
-        self.df_transactions.to_excel(self.FILE_PATH, index=False)
-        print(f'Reporte exportado exitosamente a {self.FILE_PATH}')
-        return self.FILE_PATH      
+        filename = f"data_{pd.Timestamp.now().strftime('%Y-%m-%d')}.xlsx"
+        path = os.path.join('data', filename)
+        self.df_transactions.to_excel(path, index=False)
+        return path     
 
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
