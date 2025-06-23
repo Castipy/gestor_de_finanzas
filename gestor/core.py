@@ -97,7 +97,7 @@ class FinanceManager:
         resumen = expenses.groupby(['Category'])['Amount'].sum().reset_index()
         return expenses,resumen
               
-    def monthly_expenses(self, year:str=None, month:str=None, daily:bool=False)-> pd.DataFrame:
+    def monthly_expenses(self, year:str=None, month:str=None, daily:bool=False)-> tuple:
         '''Calcula los gastos mensuales por categoría o por día.'''
         expenses,_ = self.expenses()
         # Filtrando por año y mes introducidos por usuario o actuales # 
@@ -105,14 +105,14 @@ class FinanceManager:
             year = int(year) if year else pd.Timestamp.now().year
             month = int(month) if month else pd.Timestamp.now().month
         except ValueError as e:
-            print('Año y mes deben ser números enteros.') #Error Semi-Crítico#
-            return
+            return 'invalid_date', pd.DataFrame()  
         expenses = expenses[(expenses.index.year == year) & (expenses.index.month == month)]
         if expenses.empty:
-            return expenses
+            return 'no_data',expenses
         # Si no se especifica que los gastos son diarios solo retornamos los gastos del mes por categorias#
         if not daily:
             resumen = expenses.groupby(['Category'])['Amount'].sum().reset_index()
+            return 'ok', resumen
         else:
             #Creando tabla pivote para mostrar los datos diferente#
             resumen = expenses.pivot_table(
@@ -122,31 +122,38 @@ class FinanceManager:
                 aggfunc='sum',
                 fill_value=0
                 ).reset_index()
-        return resumen
+        return 'ok',resumen
     
-    def anual_expenses(self, year:str=None, all_years:bool=False)-> pd.Series:
+    def anual_expenses(self, year:str=None, all_years:bool=False)-> tuple:
         '''Calcula los gastos anuales o los gastos de los ultimos 10 años.'''
         expenses,_ = self.expenses()
         try:
             year = int(year) if year else pd.Timestamp.now().year 
         except ValueError:
-            print("\n""Año y mes deben ser números enteros.")
-            return 
+            return 'invalid_year', pd.DataFrame()
+        
         if not all_years:
             #Filtrando por el año seleccionado#
             expenses = expenses[expenses.index.year == year]
             expenses['Month'] = expenses.index.month
+            if expenses.empty:
+                return 'no_data', pd.Series()
+            
             # Agrupar por mes y sumar
             resumen = expenses.groupby('Month')['Amount'].sum()
-            return resumen
+            return 'ok',resumen
         else:
             actual_year = pd.Timestamp.now().year
             #Filtrando gastos de los 10 ultimos años#
             list_years = list(range(actual_year-9, actual_year + 1))
             resumen = expenses[expenses.index.year.isin(list_years)]
+            if resumen.empty:
+                return 'no_data', pd.Series()
+            
+            # Agrupar por año y sumar
             resumen['Years'] = resumen.index.year
             resumen = resumen.groupby('Years')['Amount'].sum()
-            return resumen
+            return 'ok',resumen
         
     def errors_register(self, e, message) -> pd.DataFrame:
         '''Retorna los errores registrados'''
