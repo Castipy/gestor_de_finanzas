@@ -32,32 +32,33 @@ class FinanceManager:
 #Cargar y Salvar Archivos Excel#
 #########################################    
        
-    def load_excel(self) -> pd.DataFrame[Exception]:
+    def load_excel(self) -> pd.DataFrame:
         '''Carga transacciones desde un archivo excel.'''
         files = glob.glob(os.path.join('data', 'data_*.xlsx'))
-        latest_file = max(files, key=os.path.getctime)
         try:
+            latest_file = max(files, key=os.path.getctime)
             df = pd.read_excel(latest_file)
-        except FileNotFoundError as e:
-            self.ERROR=self.errors_register(e, f'Archivo no encontrado en ruta {latest_file}')
-            pass
-        #Iterando sobre filas y columnas en este caso omite las columnas#
-        for _, row in df.iterrows(): 
-            try:
-                t = Transactions(
-                    row['Model'],
-                    float(row['Amount']),
-                    row['Category'],
-                    row['Description'],
-                    row['Date']
-                )
-                    # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
-                self.df_transactions = pd.concat([self.df_transactions, 
-                                                    pd.DataFrame([t.__dict__])], 
-                                                    ignore_index=True)
-            except (KeyError, ValueError) as e:
-               self.ERROR=self.errors_register(e, f'Error al procesar la fila: {row}')
-        return self.ERROR if not self.ERROR.empty else None
+
+            #Iterando sobre filas y columnas en este caso omite las columnas#
+            for _, row in df.iterrows(): 
+                try:
+                    t = Transactions(
+                        row['Model'],
+                        float(row['Amount']),
+                        row['Category'],
+                        row['Description'],
+                        row['Date']
+                    )
+                        # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
+                    self.df_transactions = pd.concat([self.df_transactions, 
+                                                        pd.DataFrame([t.__dict__])], 
+                                                        ignore_index=True)
+                except (KeyError, ValueError) as e:
+                    self.ERROR=self.errors_register(e, f'Error al procesar la fila: {row}')
+            return self.ERROR if not self.ERROR.empty else None
+        except (FileNotFoundError, ValueError) as e:
+            self.ERROR=self.errors_register(e, f'Archivo no encontrado en ruta {files}')
+            return self.ERROR if not self.ERROR.empty else None
 
     def save_excel(self) -> str:
         '''Guarda transacciones en un archivo Excel.'''
@@ -65,7 +66,6 @@ class FinanceManager:
         os.makedirs('data', exist_ok=True) 
         #Formateando columna Date antes de guardar
         self.df_transactions['Date'] = self.df_transactions['Date'].dt.strftime(self.DATE_FORMAT) 
-        print(self.df_transactions)
         filename = f"data_{pd.Timestamp.now().strftime('%Y-%m-%d')}.xlsx"
         path = os.path.join('data', filename)
         self.df_transactions.to_excel(path, index=False)

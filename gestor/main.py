@@ -16,12 +16,13 @@ def menu():
     print("3. Ver balance total")
     print("4. Ver Gastos")
     print("5. Gráficas")
-    print("6. Guardar y salir")
+    print("6. Eliminar transacción")
+    print("7. Guardar y salir")
 
 while True:
     menu()
     choice = input("Seleccione una opción: ")
-    if choice not in ['1', '2', '3', '4', '5', '6']:
+    if choice not in ['1', '2', '3', '4', '5', '6','7']:
         print("\nOpción no válida. Por favor, seleccione una opción válida.")
         continue 
 
@@ -59,6 +60,7 @@ while True:
 
     elif choice == '3': ##Ver balance total##
         total = manager.total_balance()
+        print(f"\nEl balance total es: {total:.2f}")
             
     elif choice == '4': ##Ver gastos##
         _,resumen = manager.expenses()
@@ -237,13 +239,32 @@ while True:
             elif status == 'no_data':
                 print(f"\n""No hay gastos registrados para el mes {month} del año {year}.")
                 continue
-            
+
             year = pd.Timestamp.now().year
             resumen = resumen.reindex(range(year-9,year + 1),fill_value=0).reset_index()
             graphs.expenses_graphics(resumen, f'Gastos de los últimos 10 años {year-10}-{year}' )
+    
+    elif choice == '6': ##Eliminar transacción##
+        if manager.df_transactions.empty:
+            print("\nNo hay transacciones registradas para eliminar.")
+            continue
+        print("\n========Lista de Transacciones========")
+        df_aux = manager.df_transactions.copy()
+        df_aux['Date'] = df_aux['Date'].dt.strftime(manager.DATE_FORMAT)
+        print(df_aux[['Model', 'Amount', 'Category', 'Description', 'Date']].to_string(index=True))
+        
+        try:
+            idx = int(input("\nIngrese el índice de la transacción a eliminar: "))
+            if manager.delete_transaction(idx):
+                print(f"\nTransacción con índice {idx} eliminada correctamente.")
+            else:
+                print(f"\nÍndice inválido. No se pudo eliminar la transacción.")
+        except ValueError:
+            print("\nEntrada inválida. Debe ingresar un número entero.")
 
-    elif choice == '6': ##Guardar y salir##
-
+        manager.save_excel()
+    
+    elif choice == '7': ##Guardar y salir##
         file_path = manager.save_excel()
         print(f"\nDatos guardados en {file_path}. Saliendo...")
         break
