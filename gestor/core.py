@@ -13,18 +13,20 @@ class FinanceManager:
         FILE_PATH (str): Ruta del archivo donde se guardan las transacciones.
     Métodos:
         load_csv: Carga transacciones desde un archivo CSV.
+        load_excel: Carga transacciones desde un archivo Excel.
         save_csv: Guarda transacciones en un archivo CSV.
         add_transaction: Añade una nueva transacción a la lista.
         total_balance: Calcula el balance total de las transacciones.
-        categories_expenses: Calcula los gastos totales por categoría.
-        historial_expenses: Devuelve un historial de todas las transacciones de tipo 'expense'.
+        expenses: Calcula los gastos totales por categoría agrupados por mes y año.
+        monthly_expenses: Calcula los gastos mensuales por categoría o por día.
+        anual_expenses: Calcula los gastos anuales o los gastos de los últimos 10 años.
     ''' 
     
     DATE_FORMAT = '%d-%m-%Y %H:%M:%S'
     FILE_PATH = os.path.join('data', os.path.basename('data.xlsx'))
     
     def __init__(self):
-        self.transactions_list = []
+        self.df_transactions = pd.DataFrame()
 
     #Actualmente no se utiliza este método, pero se puede implementar en el futuro#    
     def load_csv(self, filename: str = os.path.join('data', os.path.basename('data.csv'))) -> None:
@@ -51,57 +53,114 @@ class FinanceManager:
         '''Carga transacciones desde un archivo excel.'''
         try:
             df = pd.read_excel(self.FILE_PATH)
-            for _, row in df.iterrows():
+            #Iterando sobre filas y columnas en este caso omite las columnas#
+            for _, row in df.iterrows(): 
                 try:
                     t = Transactions(
                         row['Model'],
                         float(row['Amount']),
                         row['Category'],
                         row['Description'],
-                        row['Date/Time']
+                        row['Date']
                     )
-                    self.transactions_list.append(t)
+                     # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
+                    self.df_transactions = pd.concat([self.df_transactions, 
+                                                      pd.DataFrame([t.__dict__])], 
+                                                      ignore_index=True)
                 except (KeyError, ValueError) as e:
-                    print(f"Warning: Skipping invalid row {row}. Error: {e}")
+                    print(f"\n""Warning: Skipping invalid row {row}. Error: {e}")
         except FileNotFoundError:
-            print(f"Error: El archivo {self.FILE_PATH} no existe.")
+            print(f"\n""Error: El archivo {self.FILE_PATH} no existe.")
             pass
 
     def save_excel(self) -> str:
         '''Guarda transacciones en un archivo Excel.'''
-        os.makedirs('data', exist_ok=True)
-        data = [t.__dict__ for t in self.transactions_list]
-        df = pd.DataFrame(data)
-        df.to_excel(self.FILE_PATH, index=False)
+        #Asegurandonos de que el directorio existe
+        os.makedirs('data', exist_ok=True) 
+        #Formateando columna Date antes de guardar
+        self.df_transactions['Date'] = self.df_transactions['Date'].dt.strftime(self.DATE_FORMAT) 
+        print(self.df_transactions)
+        self.df_transactions.to_excel(self.FILE_PATH, index=False)
         print(f'Reporte exportado exitosamente a {self.FILE_PATH}')
         return self.FILE_PATH      
 
-
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
-        self.transactions_list.append(transaction)
+        self.df_transactions = pd.concat([self.df_transactions, pd.DataFrame([transaction.__dict__])], ignore_index=True)
 
     def total_balance(self) -> float:
         '''Calcula el balance total de las transacciones.'''
-        total = 0
-        for t in self.transactions_list:
-            if t.model == 'income':
-                total += t.amount
-            else:
-                total -= t.amount
-        return total    
+        if self.df_transactions.empty:
+            print("\n""No hay transacciones registradas.")
+            return 0.0
+        total_expenses = self.df_transactions.loc[self.df_transactions['Model'] == 'expense', 'Amount'].sum()
+        total_incomes = self.df_transactions.loc[self.df_transactions['Model'] == 'income', 'Amount'].sum()
+        return float(total_incomes - total_expenses)
     
-    def categories_expenses(self) -> dict[str, float]:
-        '''Calcula los gastos totales por categoría.'''
-        categories = {}
-        for t in self.transactions_list:
-            if t.model == 'expense':
-                categories[t.category] = categories.get(t.category, 0) + t.amount
-        return categories
-
-    def historial_expenses(self) -> List[Transactions]: 
-        '''Devuelve un historial de todas las transacciones de tipo 'expense'.'''
-        df = pd.DataFrame([t.__dict__ for t in self.transactions_list])
-        df['date'] = pd.to_datetime(df['date'], format=self.DATE_FORMAT)
-        df = df[df['model'] == 'expense']
-        return df
+    def expenses(self) -> tuple:
+        '''Calcula los gastos totales por categoría agrupados por mes y año.'''
+        # Chequeo de transacciones #
+        if self.df_transactions.empty: 
+            print("\n""No hay transacciones registradas.")
+            return pd.DataFrame()
+        # Filtrando por gastos #
+        expenses = self.df_transactions[self.df_transactions['Model'] == 'expense'].copy()
+        #Chequeo de gastos
+        if expenses.empty:
+            return expenses
+        # Columna Date nuevo indice para filtrado #
+        expenses.set_index('Date', inplace=True)
+        # Aun no tiene uso la tabla resumen pero muestra los gastos #
+        resumen = expenses.groupby(['Category'])['Amount'].sum().reset_index()
+        return expenses,resumen
+              
+    def monthly_expenses(self, year:str=None, month:str=None, daily:bool=False)-> pd.DataFrame:
+        '''Calcula los gastos mensuales por categoría o por día.'''
+        expenses,_ = self.expenses()
+        # Filtrando por año y mes introducidos por usuario o actuales # 
+        try:
+            year = int(year) if year else pd.Timestamp.now().year
+            month = int(month) if month else pd.Timestamp.now().month
+        except ValueError:
+            print("\n""Año y mes deben ser números enteros.")
+            return
+        expenses = expenses[(expenses.index.year == year) & (expenses.index.month == month)]
+        if expenses.empty:
+            return expenses
+        # Si no se especifica que los gastos son diarios solo retornamos los gastos del mes por categorias#
+        if not daily:
+            resumen = expenses.groupby(['Category'])['Amount'].sum().reset_index()
+        else:
+            #Creando tabla pivote para mostrar los datos diferente#
+            resumen = expenses.pivot_table(
+                index=expenses.index.day,   # cada día como fila
+                columns='Category',          # cada categoría como columna
+                values='Amount',
+                aggfunc='sum',
+                fill_value=0
+                ).reset_index()
+        return resumen
+    
+    def anual_expenses(self, year:str=None, all_years:bool=False)-> pd.Series:
+        '''Calcula los gastos anuales o los gastos de los ultimos 10 años.'''
+        expenses,_ = self.expenses()
+        try:
+            year = int(year) if year else pd.Timestamp.now().year 
+        except ValueError:
+            print("\n""Año y mes deben ser números enteros.")
+            return 
+        if not all_years:
+            #Filtrando por el año seleccionado#
+            expenses = expenses[expenses.index.year == year]
+            expenses['Month'] = expenses.index.month
+            # Agrupar por mes y sumar
+            resumen = expenses.groupby('Month')['Amount'].sum()
+            return resumen
+        else:
+            actual_year = pd.Timestamp.now().year
+            #Filtrando gastos de los 10 ultimos años#
+            list_years = list(range(actual_year-9, actual_year + 1))
+            resumen = expenses[expenses.index.year.isin(list_years)]
+            resumen['Years'] = resumen.index.year
+            resumen = resumen.groupby('Years')['Amount'].sum()
+            return resumen
