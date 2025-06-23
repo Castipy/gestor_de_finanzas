@@ -24,35 +24,36 @@ class FinanceManager:
     
     DATE_FORMAT = '%d-%m-%Y %H:%M:%S'
     FILE_PATH = os.path.join('data', os.path.basename('data.xlsx'))
-    
+    ERROR = pd.DataFrame(columns=['Error','Message'])
     def __init__(self):
         self.df_transactions = pd.DataFrame()
 
     #Actualmente no se utiliza este método, pero se puede implementar en el futuro#    
        
-    def load_excel(self) -> None:
+    def load_excel(self) -> pd.DataFrame[Exception]:
         '''Carga transacciones desde un archivo excel.'''
         try:
             df = pd.read_excel(self.FILE_PATH)
-            #Iterando sobre filas y columnas en este caso omite las columnas#
-            for _, row in df.iterrows(): 
-                try:
-                    t = Transactions(
-                        row['Model'],
-                        float(row['Amount']),
-                        row['Category'],
-                        row['Description'],
-                        row['Date']
-                    )
-                     # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
-                    self.df_transactions = pd.concat([self.df_transactions, 
-                                                      pd.DataFrame([t.__dict__])], 
-                                                      ignore_index=True)
-                except (KeyError, ValueError) as e:
-                    print(f"\n""Warning: Skipping invalid row {row}. Error: {e}")
-        except FileNotFoundError:
-            print(f"\n""Error: El archivo {self.FILE_PATH} no existe.")
+        except FileNotFoundError as e:
+            self.ERROR=self.errors_register(e, f'Archivo no encontrado en ruta {self.FILE_PATH}')
             pass
+        #Iterando sobre filas y columnas en este caso omite las columnas#
+        for _, row in df.iterrows(): 
+            try:
+                t = Transactions(
+                    row['Model'],
+                    float(row['Amount']),
+                    row['Category'],
+                    row['Description'],
+                    row['Date']
+                )
+                    # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
+                self.df_transactions = pd.concat([self.df_transactions, 
+                                                    pd.DataFrame([t.__dict__])], 
+                                                    ignore_index=True)
+            except (KeyError, ValueError) as e:
+               self.ERROR=self.errors_register(e, f'Error al procesar la fila: {row}')
+        return self.ERROR if not self.ERROR.empty else None
 
     def save_excel(self) -> str:
         '''Guarda transacciones en un archivo Excel.'''
@@ -72,8 +73,7 @@ class FinanceManager:
     def total_balance(self) -> float:
         '''Calcula el balance total de las transacciones.'''
         if self.df_transactions.empty:
-            print("\n""No hay transacciones registradas.")
-            return 0.0
+            return pd.DataFrame()
         total_expenses = self.df_transactions.loc[self.df_transactions['Model'] == 'expense', 'Amount'].sum()
         total_incomes = self.df_transactions.loc[self.df_transactions['Model'] == 'income', 'Amount'].sum()
         return float(total_incomes - total_expenses)
@@ -82,7 +82,6 @@ class FinanceManager:
         '''Calcula los gastos totales por categoría agrupados por mes y año.'''
         # Chequeo de transacciones #
         if self.df_transactions.empty: 
-            print("\n""No hay transacciones registradas.")
             return pd.DataFrame()
         # Filtrando por gastos #
         expenses = self.df_transactions[self.df_transactions['Model'] == 'expense'].copy()
@@ -102,8 +101,8 @@ class FinanceManager:
         try:
             year = int(year) if year else pd.Timestamp.now().year
             month = int(month) if month else pd.Timestamp.now().month
-        except ValueError:
-            print("\n""Año y mes deben ser números enteros.")
+        except ValueError as e:
+            print('Año y mes deben ser números enteros.') #Error Semi-Crítico#
             return
         expenses = expenses[(expenses.index.year == year) & (expenses.index.month == month)]
         if expenses.empty:
@@ -145,3 +144,10 @@ class FinanceManager:
             resumen['Years'] = resumen.index.year
             resumen = resumen.groupby('Years')['Amount'].sum()
             return resumen
+        
+    def errors_register(self, e, message) -> pd.DataFrame:
+        '''Retorna los errores registrados'''
+        self.ERROR = pd.concat([self.ERROR, 
+                                    pd.DataFrame([{'Error': type(e).__name__, 'Message': message}])], 
+                                    ignore_index=True)
+        return self.ERROR
