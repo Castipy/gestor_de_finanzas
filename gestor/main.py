@@ -24,7 +24,7 @@ def menu():
 while True:
     menu()
     choice = input("Seleccione una opción: ")
-    if choice not in ['1', '2', '3', '4', '5', '6','7']:
+    if choice not in ['1', '2', '3', '4', '5', '6','7','8','9']:
         print("\nOpción no válida. Por favor, seleccione una opción válida.")
         continue 
 
@@ -254,7 +254,6 @@ while True:
 
         print("\n========Lista de Transacciones========")
         df_aux = manager.df_transactions.copy()
-        df_aux['Date'] = df_aux['Date'].dt.strftime(manager.DATE_FORMAT)
         print(df_aux[['Model', 'Amount', 'Category', 'Description', 'Date']].to_string(index=True))
         
         try:
@@ -274,7 +273,6 @@ while True:
             continue
         # Mostrar todas las transacciones con índice
         df_temp = manager.list_transactions()
-        df_temp['Date'] = df_temp['Date'].dt.strftime(manager.DATE_FORMAT)
         print("\nTransacciones registradas:")
         print(df_temp.to_string(index=False))
 
