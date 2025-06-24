@@ -193,3 +193,17 @@ class FinanceManager:
             self.df_transactions.reset_index(drop=True, inplace=True)
             return True
         return False
+    
+    def edit_transaction(self, index: int, **kwargs) -> bool:
+        '''Edita una transacción por su índice. kwargs pueden ser columnas nuevas.'''
+        if 0 <= index < len(self.df_transactions):
+            for key, value in kwargs.items():
+                if key in self.df_transactions.columns:
+                    if key == 'Date':
+                        try:
+                            value = pd.to_datetime(value, format=self.DATE_FORMAT)
+                        except ValueError:
+                            continue  # Ignora si la fecha es inválida
+                    self.df_transactions.at[index, key] = value
+            return True
+        return False

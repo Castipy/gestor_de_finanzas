@@ -17,7 +17,8 @@ def menu():
     print("4. Ver Gastos")
     print("5. Gráficas")
     print("6. Eliminar transacción")
-    print("7. Guardar y salir")
+    print("7. Editar transacción")
+    print("8. Guardar y salir")
 
 while True:
     menu()
@@ -67,6 +68,7 @@ while True:
         if resumen.empty:
                 print("\nNo hay gastos registrados")
                 continue
+        
         print('\nQue tipo de datos desea ver?',
               '\n1. Gastos Totales',
               '\n2. Gastos Mensuales',
@@ -248,6 +250,7 @@ while True:
         if manager.df_transactions.empty:
             print("\nNo hay transacciones registradas para eliminar.")
             continue
+
         print("\n========Lista de Transacciones========")
         df_aux = manager.df_transactions.copy()
         df_aux['Date'] = df_aux['Date'].dt.strftime(manager.DATE_FORMAT)
@@ -264,7 +267,48 @@ while True:
 
         manager.save_excel()
     
-    elif choice == '7': ##Guardar y salir##
+    elif choice == '7':
+        if manager.df_transactions.empty:
+            print("\nNo hay transacciones registradas para editar.")
+            continue
+        # Mostrar todas las transacciones con índice
+        df_temp = manager.list_transactions()
+        df_temp['Date'] = df_temp['Date'].dt.strftime(manager.DATE_FORMAT)
+        print("\nTransacciones registradas:")
+        print(df_temp.to_string(index=False))
+
+        try:
+            index = int(input("Ingrese el índice de la transacción que desea editar: "))
+        except ValueError:
+            print("Índice inválido.")
+            continue
+
+        if index < 0 or index >= len(manager.df_transactions):
+            print("Índice fuera de rango.")
+            continue
+
+        print("\nCampos disponibles: Model, Amount, Category, Description, Date")
+        campo = input("Ingrese el nombre del campo que desea editar: ").strip()
+        if campo not in ['Model', 'Amount', 'Category', 'Description', 'Date']:
+            print("Campo no válido.")
+            continue
+
+        nuevo_valor = input(f"Ingrese el nuevo valor para '{campo}': ").strip()
+        
+        if campo == 'Amount':
+            try:
+                nuevo_valor = float(nuevo_valor)
+            except ValueError:
+                print("Monto inválido.")
+                continue
+
+        actualizado = manager.edit_transaction(index, **{campo: nuevo_valor})
+        if actualizado:
+            print("\nTransacción actualizada exitosamente.")
+        else:
+            print("\nError al actualizar la transacción.")
+    
+    elif choice == '8': ##Guardar y salir##
         file_path = manager.save_excel()
         print(f"\nDatos guardados en {file_path}. Saliendo...")
         break
