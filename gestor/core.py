@@ -1,5 +1,4 @@
 from transactions import Transactions
-from typing import List
 import pandas as pd
 import os
 import glob
@@ -161,7 +160,7 @@ class FinanceManager:
 #########################################
         #Manejo de Errores#
 ######################################### 
-#         
+         
     def errors_register(self, e, message) -> pd.DataFrame:
         '''Retorna los errores registrados'''
         self.ERROR = pd.concat([self.ERROR, 
@@ -207,3 +206,34 @@ class FinanceManager:
                     self.df_transactions.at[index, key] = value
             return True
         return False
+    
+    def search_transactions(self, model: str = None, 
+                            category: str = None,
+                            description: str = None,
+                            start_date: str = None,
+                            end_date: str = None) -> pd.DataFrame:
+        '''Busca transacciones por modelo, categoría, descripción y rango de fechas.'''
+        if self.df_transactions.empty:
+            return pd.DataFrame()
+        
+        df = self.df_transactions.copy()
+
+        if model:
+            df = df[df['Model'].str.lower() == model.lower()]
+        if category:
+            df = df[df['Category'].str.lower().str.contains(category.lower())]
+        if description:
+            df = df[df['Description'].str.lower().str.contains(description.lower())]
+        if start_date:
+            try:
+                start_date = pd.to_datetime(start_date, format=self.DATE_FORMAT)
+                df = df[df['Date'] >= start_date]
+            except ValueError:
+                return pd.DataFrame()
+        if end_date:
+            try:
+                end_date = pd.to_datetime(end_date, format=self.DATE_FORMAT)
+                df = df[df['Date'] <= end_date]
+            except ValueError:
+                pass
+        return df

@@ -18,7 +18,8 @@ def menu():
     print("5. Gráficas")
     print("6. Eliminar transacción")
     print("7. Editar transacción")
-    print("8. Guardar y salir")
+    print("8. Filtrar Transacciones")
+    print("9. Guardar y salir")
 
 while True:
     menu()
@@ -267,7 +268,7 @@ while True:
 
         manager.save_excel()
     
-    elif choice == '7':
+    elif choice == '7': ##Editar transacción##
         if manager.df_transactions.empty:
             print("\nNo hay transacciones registradas para editar.")
             continue
@@ -307,8 +308,31 @@ while True:
             print("\nTransacción actualizada exitosamente.")
         else:
             print("\nError al actualizar la transacción.")
-    
-    elif choice == '8': ##Guardar y salir##
+
+    elif choice == '8': ##Filtrar transacciones##
+        print("\n=== Buscar transacciones ===")
+        model = input("Tipo (income/expense) o dejar en blanco: ").strip()
+        category = input("Categoría o dejar en blanco: ").strip()
+        description = input("Descripción o dejar en blanco: ").strip()
+        start_date = input("Fecha inicio (dd-mm-YYYY HH:MM:SS) o dejar en blanco: ").strip()
+        end_date = input("Fecha fin (dd-mm-YYYY HH:MM:SS) o dejar en blanco: ").strip()
+        
+        search = manager.search_transactions(
+            model=model if model else None,
+            category=category if category else None,
+            description=description if description else None,
+            start_date=start_date if start_date else None,
+            end_date=end_date if end_date else None
+        )
+
+        if search.empty:
+            print("\nNo se encontraron transacciones con los criterios dados.")
+        else:
+            print(f"\nSe encontraron {len(search)} transacciones:\n")
+            print(search.to_string(index=True))
+        
+
+    elif choice == '9': ##Guardar y salir##
         file_path = manager.save_excel()
         print(f"\nDatos guardados en {file_path}. Saliendo...")
         break
