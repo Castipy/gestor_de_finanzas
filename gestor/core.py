@@ -48,10 +48,13 @@ class FinanceManager:
                         row['Description'],
                         row['Date']
                     )
-                        # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
+                    # Creando el DF concatenando los atributos de la clase Transactions y los del propio DataFrame
                     self.df_transactions = pd.concat([self.df_transactions, 
                                                         pd.DataFrame([t.__dict__])], 
                                                         ignore_index=True)
+                    
+                    # Formateando la columna Date a tipo datetime#
+                    self.convert_date(self.df_transactions, 'Date', 'to_datetime')
                 except (KeyError, ValueError) as e:
                     self.ERROR=self.errors_register(e, f'Error al procesar la fila: {row}')
             return self.ERROR if not self.ERROR.empty else None
@@ -64,7 +67,8 @@ class FinanceManager:
         #Asegurandonos de que el directorio existe
         os.makedirs('data', exist_ok=True) 
         #Formateando columna Date antes de guardar
-        self.df_transactions['Date'] = self.df_transactions['Date'].dt.strftime(self.DATE_FORMAT) 
+        self.convert_date(self.df_transactions, 'Date', 'to_string')
+        #Guardando el DataFrame en un archivo Excel con la fecha actual
         filename = f"data_{pd.Timestamp.now().strftime('%Y-%m-%d')}.xlsx"
         path = os.path.join('data', filename)
         self.df_transactions.to_excel(path, index=False)
@@ -160,6 +164,19 @@ class FinanceManager:
 #########################################
         #Manejo de Errores#
 ######################################### 
+    def convert_date(self, df: pd.DataFrame, date_column: str, conv_type:str) -> pd.DataFrame:
+        '''Convierte una columna de fecha a tipo datetime.'''
+
+        if conv_type == 'to_datetime':
+            try:
+                df[date_column] = pd.to_datetime(df[date_column], format=self.DATE_FORMAT)
+            except ValueError:
+                pass
+            return df
+        
+        elif conv_type == 'to_string':
+            df[date_column] = df[date_column].dt.strftime(self.DATE_FORMAT)
+            return df 
          
     def errors_register(self, e, message) -> pd.DataFrame:
         '''Retorna los errores registrados'''
@@ -237,3 +254,5 @@ class FinanceManager:
             except ValueError:
                 pass
         return df
+    
+            
