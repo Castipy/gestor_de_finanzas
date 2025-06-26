@@ -1,4 +1,4 @@
-from transactions import Transactions
+from gestor.transactions import Transactions
 import pandas as pd
 import os
 import glob
@@ -25,7 +25,13 @@ class FinanceManager:
     ERROR = pd.DataFrame(columns=['Error','Message'])
     
     def __init__(self):
-        self.df_transactions = pd.DataFrame()
+        self.df_transactions = pd.DataFrame({
+            'Model': pd.Series(dtype='str'),
+            'Amount': pd.Series(dtype='float'),
+            'Category': pd.Series(dtype='str'),
+            'Description': pd.Series(dtype='str'),
+            'Date': pd.Series(dtype='datetime64[ns]')
+        })
 
 #########################################
 #Cargar y Salvar Archivos Excel#
@@ -80,7 +86,13 @@ class FinanceManager:
 
     def add_transaction(self, transaction: Transactions) -> None:
         '''Añade una nueva transacción a la lista.'''
-        self.df_transactions = pd.concat([self.df_transactions, pd.DataFrame([transaction.__dict__])], ignore_index=True)
+        # Asegura que todas las columnas estén presentes en el diccionario
+        data = {col: getattr(transaction, col, None) for col in self.df_transactions.columns}
+        # Si TODOS los valores son None, no agregues la fila (evita el warning)
+        if all(v is None for v in data.values()):
+            return
+        new_row = pd.DataFrame([data], columns=self.df_transactions.columns)
+        self.df_transactions = pd.concat([self.df_transactions, new_row], ignore_index=True)
 
     def total_balance(self) -> float:
         '''Calcula el balance total de las transacciones.'''
@@ -96,7 +108,7 @@ class FinanceManager:
         expenses = self.df_transactions[self.df_transactions['Model'] == 'expense'].copy()
         #Chequeo de gastos
         if expenses.empty:
-            return expenses
+            return expenses, pd.DataFrame()
         # Columna Date nuevo indice para filtrado #
         expenses.set_index('Date', inplace=True)
         # Aun no tiene uso la tabla resumen pero muestra los gastos #
@@ -106,13 +118,18 @@ class FinanceManager:
     def monthly_expenses(self, year:str=None, month:str=None, daily:bool=False)-> tuple:
         '''Calcula los gastos mensuales por categoría o por día.'''
         expenses,_ = self.expenses()
+         # Asegura que el índice es datetime parapruebas posteriores #
+        if not isinstance(expenses.index, pd.DatetimeIndex):
+            if 'Date' in expenses.columns:
+                expenses['Date'] = pd.to_datetime(expenses['Date'], errors='coerce')
+                expenses = expenses.set_index('Date')
         # Filtrando por año y mes introducidos por usuario o actuales # 
         try:
             year = int(year) if year else pd.Timestamp.now().year
             month = int(month) if month else pd.Timestamp.now().month
-        except ValueError as e:
-            return 'invalid_date', pd.DataFrame()  
-        expenses = expenses[(expenses.index.year == year) & (expenses.index.month == month)]
+            expenses = expenses[(expenses.index.year == year) & (expenses.index.month == month)]
+        except (ValueError) as e:
+            return 'invalid_date', pd.DataFrame()
         if expenses.empty:
             return 'no_data',expenses
         # Si no se especifica que los gastos son diarios solo retornamos los gastos del mes por categorias#
@@ -133,9 +150,14 @@ class FinanceManager:
     def anual_expenses(self, year:str=None, all_years:bool=False)-> tuple:
         '''Calcula los gastos anuales o los gastos de los ultimos 10 años.'''
         expenses,_ = self.expenses()
+        # Asegura que el índice es datetime para pruebas posteriores #
+        if not isinstance(expenses.index, pd.DatetimeIndex):
+            if 'Date' in expenses.columns:
+                expenses['Date'] = pd.to_datetime(expenses['Date'], errors='coerce')
+                expenses = expenses.set_index('Date')
         try:
             year = int(year) if year else pd.Timestamp.now().year 
-        except ValueError:
+        except (ValueError) as e:
             return 'invalid_year', pd.DataFrame()
         
         if not all_years:
@@ -221,6 +243,8 @@ class FinanceManager:
                         except ValueError:
                             continue  # Ignora si la fecha es inválida
                     self.df_transactions.at[index, key] = value
+                else:
+                    return False               
             return True
         return False
     
