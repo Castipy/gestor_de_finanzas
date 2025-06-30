@@ -3,7 +3,7 @@ import seaborn as sns
 import pandas as pd
 import os
 from typing import List
-from core import FinanceManager
+from gestor.core import FinanceManager
 
 class Graphs:
 
@@ -25,7 +25,7 @@ class Graphs:
     def expenses_graphics(self, df:pd.DataFrame, title:str, graph_type:str = 'bar')-> plt.Figure:
         '''Genera gráficos de gastos en diferentes formatos (barra, pastel, línea).'''
         #Tamaño de la figura#
-        plt.figure(figsize=(6, 4))
+        plt.figure(figsize=(len(df.columns)*2, len(df)*2))
         #Tema y paleta de colores#
         sns.set_theme(style="whitegrid")
         sns.set_palette("pastel")
@@ -55,7 +55,7 @@ class Graphs:
             #Obtenemos el valor maximo del eje Y#
             max_y = plt.gca().get_ylim()[1]
             #Forzamos a que los valores en Y tengan una distancia de 200u#
-            plt.yticks(range(0, int(max_y) + 100, 200))
+            plt.yticks(range(0, int(max_y) + 10, int(max_y / 10)))
             plt.xticks(rotation=0)
             plt.title(title)
             plt.xlabel("Fecha")

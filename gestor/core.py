@@ -1,4 +1,4 @@
-from transactions import Transactions
+from gestor.transactions import Transactions
 import pandas as pd
 import os
 import glob
