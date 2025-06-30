@@ -71,8 +71,8 @@ class Graphs:
 
     def save_graph(self, filename:str) -> None:
         '''Guarda el gráfico generado en un archivo.'''
-        os.makedirs('images', exist_ok=True)
+        os.makedirs('static', exist_ok=True)
         filename = os.path.basename(filename)
-        ruta_imagen = os.path.join('images', filename)
+        ruta_imagen = os.path.join('static', filename)
         plt.savefig(ruta_imagen)
         print(f"Gráfica guardada como: {ruta_imagen}")

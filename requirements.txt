@@ -2,3 +2,6 @@ matplotlib
 seaborn
 pandas
 openpyxl
+coverage
+unittest
+pytest
